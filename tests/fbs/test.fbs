@@ -1,0 +1,43 @@
+
+namespace test_fbs;
+
+
+// 语言
+// unknown: 未知
+// chs: 简体中文
+// cht: 繁体中文
+// eng: 英文
+enum Language: ubyte {NONE = 0, CHS, CHT, ENG}
+
+// 扩展结构
+table Pair
+{
+	first: string;
+	second: string;
+}
+
+// 用户信息
+table Account
+{
+	lang: Language;
+    extras: [Pair];
+	
+	test_str: string;
+	test_vct_str: [string];
+	test_int: int;
+	test_vct_int: [int];
+	test_uint: uint;
+	test_vct_uint: [uint];
+	test_short: short;
+	test_vct_short: [short];
+	test_long: long;
+	test_vct_long: [long];
+	test_ulong: ulong;
+	test_vct_ulong: [ulong];
+	test_float: float;
+	test_vct_float: [float];
+	test_bool: bool;
+	test_vct_bool: [bool];
+}
+
+root_type Account;
