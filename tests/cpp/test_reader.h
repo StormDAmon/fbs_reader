@@ -213,6 +213,8 @@ struct Pair
 struct Account
 {
 	test_fbs::Language lang;
+	std::vector<test_fbs::Language> langs;
+	Pair extra;
 	std::vector<Pair> extras;
 	std::string test_str;
 	std::vector<std::string> test_vct_str;
@@ -244,6 +246,8 @@ struct Account
 	Account(const Account &src)
 	{
 		lang = src.lang;
+		langs = src.langs;
+		extra = src.extra;
 		extras = src.extras;
 		test_str = src.test_str;
 		test_vct_str = src.test_vct_str;
@@ -276,6 +280,8 @@ struct Account
 	{
 		if (!ptr_fbs) return;
 		lang = ptr_fbs->lang();
+		langs = read_vct_enum<test_fbs::Language, uint8_t>(ptr_fbs->langs());
+		extra = ptr_fbs->extra();
 		extras = read_vct<Pair, test_fbs::Pair>(ptr_fbs->extras());
 		test_str = GX3(ptr_fbs, test_str(), c_str(), "");
 		test_vct_str = read_vct_str<std::string, flatbuffers::String>(ptr_fbs->test_vct_str());
@@ -300,13 +306,15 @@ struct Account
 	}
 	flatbuffers::Offset<test_fbs::Account> to_fbs(flatbuffers::FlatBufferBuilder &fb)
 	{
-		return test_fbs::CreateAccount(fb, lang, build_vct<Pair, test_fbs::Pair>(fb, extras), fs(test_str), build_vct_str<std::string, flatbuffers::String>(fb, test_vct_str), test_int, build_vct_enum<int32_t, int32_t>(fb, test_vct_int), test_uint, build_vct_enum<uint32_t, uint32_t>(fb, test_vct_uint), test_short, build_vct_enum<int16_t, int16_t>(fb, test_vct_short), test_long, build_vct_enum<int64_t, int64_t>(fb, test_vct_long), test_ulong, build_vct_enum<uint64_t, uint64_t>(fb, test_vct_ulong), test_float, build_vct_enum<float, float>(fb, test_vct_float), test_bool, build_vct_enum<bool, uint8_t>(fb, test_vct_bool));
+		return test_fbs::CreateAccount(fb, lang, build_vct_enum<test_fbs::Language, uint8_t>(fb, langs), extra.to_fbs(fb), build_vct<Pair, test_fbs::Pair>(fb, extras), fs(test_str), build_vct_str<std::string, flatbuffers::String>(fb, test_vct_str), test_int, build_vct_enum<int32_t, int32_t>(fb, test_vct_int), test_uint, build_vct_enum<uint32_t, uint32_t>(fb, test_vct_uint), test_short, build_vct_enum<int16_t, int16_t>(fb, test_vct_short), test_long, build_vct_enum<int64_t, int64_t>(fb, test_vct_long), test_ulong, build_vct_enum<uint64_t, uint64_t>(fb, test_vct_ulong), test_float, build_vct_enum<float, float>(fb, test_vct_float), test_bool, build_vct_enum<bool, uint8_t>(fb, test_vct_bool));
 	}
 	std::string to_json(const bool b_simplify = false)
 	{
 		std::stringstream ss;
 		ss << "{";
 		ss << "\"lang\":" << "\"" << EnumNameLanguage(lang) << "\"" << ",";
+		if (!b_simplify || (b_simplify && langs.size())) ss << "\"langs\":" << read_vct_2_json<test_fbs::Language>(langs) << ",";
+		ss << "\"extra\":" << extra.to_json(b_simplify) << ",";
 		if (!b_simplify || (b_simplify && extras.size())) ss << "\"extras\":" << read_vct_2_json<Pair>(extras) << ",";
 		if (!b_simplify || (b_simplify && test_str.size())) ss << "\"test_str\":" << "\"" << test_str << "\"" << ",";
 		if (!b_simplify || (b_simplify && test_vct_str.size())) ss << "\"test_vct_str\":" << read_vct_2_json<std::string>(test_vct_str) << ",";

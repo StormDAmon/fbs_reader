@@ -115,26 +115,34 @@ inline flatbuffers::Offset<Pair> CreatePairDirect(
 struct Account FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_LANG = 4,
-    VT_EXTRAS = 6,
-    VT_TEST_STR = 8,
-    VT_TEST_VCT_STR = 10,
-    VT_TEST_INT = 12,
-    VT_TEST_VCT_INT = 14,
-    VT_TEST_UINT = 16,
-    VT_TEST_VCT_UINT = 18,
-    VT_TEST_SHORT = 20,
-    VT_TEST_VCT_SHORT = 22,
-    VT_TEST_LONG = 24,
-    VT_TEST_VCT_LONG = 26,
-    VT_TEST_ULONG = 28,
-    VT_TEST_VCT_ULONG = 30,
-    VT_TEST_FLOAT = 32,
-    VT_TEST_VCT_FLOAT = 34,
-    VT_TEST_BOOL = 36,
-    VT_TEST_VCT_BOOL = 38
+    VT_LANGS = 6,
+    VT_EXTRA = 8,
+    VT_EXTRAS = 10,
+    VT_TEST_STR = 12,
+    VT_TEST_VCT_STR = 14,
+    VT_TEST_INT = 16,
+    VT_TEST_VCT_INT = 18,
+    VT_TEST_UINT = 20,
+    VT_TEST_VCT_UINT = 22,
+    VT_TEST_SHORT = 24,
+    VT_TEST_VCT_SHORT = 26,
+    VT_TEST_LONG = 28,
+    VT_TEST_VCT_LONG = 30,
+    VT_TEST_ULONG = 32,
+    VT_TEST_VCT_ULONG = 34,
+    VT_TEST_FLOAT = 36,
+    VT_TEST_VCT_FLOAT = 38,
+    VT_TEST_BOOL = 40,
+    VT_TEST_VCT_BOOL = 42
   };
   Language lang() const {
     return static_cast<Language>(GetField<uint8_t>(VT_LANG, 0));
+  }
+  const flatbuffers::Vector<uint8_t> *langs() const {
+    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_LANGS);
+  }
+  const Pair *extra() const {
+    return GetPointer<const Pair *>(VT_EXTRA);
   }
   const flatbuffers::Vector<flatbuffers::Offset<Pair>> *extras() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Pair>> *>(VT_EXTRAS);
@@ -190,6 +198,10 @@ struct Account FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_LANG) &&
+           VerifyOffset(verifier, VT_LANGS) &&
+           verifier.VerifyVector(langs()) &&
+           VerifyOffset(verifier, VT_EXTRA) &&
+           verifier.VerifyTable(extra()) &&
            VerifyOffset(verifier, VT_EXTRAS) &&
            verifier.VerifyVector(extras()) &&
            verifier.VerifyVectorOfTables(extras()) &&
@@ -228,6 +240,12 @@ struct AccountBuilder {
   flatbuffers::uoffset_t start_;
   void add_lang(Language lang) {
     fbb_.AddElement<uint8_t>(Account::VT_LANG, static_cast<uint8_t>(lang), 0);
+  }
+  void add_langs(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> langs) {
+    fbb_.AddOffset(Account::VT_LANGS, langs);
+  }
+  void add_extra(flatbuffers::Offset<Pair> extra) {
+    fbb_.AddOffset(Account::VT_EXTRA, extra);
   }
   void add_extras(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Pair>>> extras) {
     fbb_.AddOffset(Account::VT_EXTRAS, extras);
@@ -295,6 +313,8 @@ struct AccountBuilder {
 inline flatbuffers::Offset<Account> CreateAccount(
     flatbuffers::FlatBufferBuilder &_fbb,
     Language lang = Language_NONE,
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> langs = 0,
+    flatbuffers::Offset<Pair> extra = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Pair>>> extras = 0,
     flatbuffers::Offset<flatbuffers::String> test_str = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> test_vct_str = 0,
@@ -328,6 +348,8 @@ inline flatbuffers::Offset<Account> CreateAccount(
   builder_.add_test_vct_str(test_vct_str);
   builder_.add_test_str(test_str);
   builder_.add_extras(extras);
+  builder_.add_extra(extra);
+  builder_.add_langs(langs);
   builder_.add_test_short(test_short);
   builder_.add_test_bool(test_bool);
   builder_.add_lang(lang);
@@ -337,6 +359,8 @@ inline flatbuffers::Offset<Account> CreateAccount(
 inline flatbuffers::Offset<Account> CreateAccountDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     Language lang = Language_NONE,
+    const std::vector<uint8_t> *langs = nullptr,
+    flatbuffers::Offset<Pair> extra = 0,
     const std::vector<flatbuffers::Offset<Pair>> *extras = nullptr,
     const char *test_str = nullptr,
     const std::vector<flatbuffers::Offset<flatbuffers::String>> *test_vct_str = nullptr,
@@ -354,6 +378,7 @@ inline flatbuffers::Offset<Account> CreateAccountDirect(
     const std::vector<float> *test_vct_float = nullptr,
     bool test_bool = false,
     const std::vector<uint8_t> *test_vct_bool = nullptr) {
+  auto langs__ = langs ? _fbb.CreateVector<uint8_t>(*langs) : 0;
   auto extras__ = extras ? _fbb.CreateVector<flatbuffers::Offset<Pair>>(*extras) : 0;
   auto test_str__ = test_str ? _fbb.CreateString(test_str) : 0;
   auto test_vct_str__ = test_vct_str ? _fbb.CreateVector<flatbuffers::Offset<flatbuffers::String>>(*test_vct_str) : 0;
@@ -367,6 +392,8 @@ inline flatbuffers::Offset<Account> CreateAccountDirect(
   return test_fbs::CreateAccount(
       _fbb,
       lang,
+      langs__,
+      extra,
       extras__,
       test_str__,
       test_vct_str__,

@@ -23,17 +23,17 @@ reader::reader()
 	m_map_cls_name_cpp["bool"] = "bool";
 	m_map_cls_name_cpp["string"] = "std::string";
 
-	m_map_cls_name_py3["byte"] = "int()";
-	m_map_cls_name_py3["ubyte"] = "int()";
-	m_map_cls_name_py3["short"] = "int()";
-	m_map_cls_name_py3["ushort"] = "int()";
-	m_map_cls_name_py3["int"] = "int()";
-	m_map_cls_name_py3["uint"] = "int()";
-	m_map_cls_name_py3["long"] = "int()";
-	m_map_cls_name_py3["ulong"] = "int()";
-	m_map_cls_name_py3["float"] = "float()";
-	m_map_cls_name_py3["bool"] = "bool()";
-	m_map_cls_name_py3["string"] = "str()";
+	m_map_cls_name_py3["byte"] = "0";
+	m_map_cls_name_py3["ubyte"] = "0";
+	m_map_cls_name_py3["short"] = "0";
+	m_map_cls_name_py3["ushort"] = "0";
+	m_map_cls_name_py3["int"] = "0";
+	m_map_cls_name_py3["uint"] = "0";
+	m_map_cls_name_py3["long"] = "0";
+	m_map_cls_name_py3["ulong"] = "0";
+	m_map_cls_name_py3["float"] = "0.0";
+	m_map_cls_name_py3["bool"] = "False";
+	m_map_cls_name_py3["string"] = "''";
 }
 
 
@@ -120,7 +120,7 @@ bool reader::load(const std::string &str_path)
 					rl_replace(str_table_name, "\r\n", "");
 					rl_replace(str_table_name, "\n", "");
 					rl_replace(str_table_name, " ", "");
-					TABLE table;
+					Table table;
 					table.name = str_table_name;
 					table.base = str_cur_tmp;
 					m_vct_table.push_back(table);
@@ -133,9 +133,75 @@ bool reader::load(const std::string &str_path)
 			}
 		}
 	}
+
+	transTable();
 	return true;
 }
 
+void reader::transTable()
+{
+	for (auto &t : m_vct_table)
+	{
+		// items
+		auto vct_tmp = rl_split(t.base, "{");
+		std::string str_data = vct_tmp[1];
+		rl_replace(str_data, "}", "");
+
+		std::string str_tmp = str_data;
+		str_data.clear();
+		std::string str_begin_flag;
+		for (auto iter = str_tmp.begin(); iter != str_tmp.end(); iter++)
+		{
+			if (str_begin_flag.empty())
+			{
+				if (is_match("/*", iter)) str_begin_flag = "/*";
+				else if (is_match("//", iter)) str_begin_flag = "//";
+			}
+			if (str_begin_flag.size())
+			{
+				if (BOTH("/*", "*/") || BOTH_2E("//", "\n", "\r\n"))
+				{
+					if (BOTH("/*", "*/")) iter++;
+					str_begin_flag.clear();
+				}
+				continue;
+			}
+			str_data += *iter;
+		}
+		rl_replace(str_data, "\r\n", "");
+		rl_replace(str_data, "\n", "");
+		rl_replace(str_data, "\t", "");
+		rl_replace(str_data, " ", "");
+
+		auto vct_items = rl_split(str_data, ";");
+		for (auto item : vct_items)
+		{
+			if (std::string::npos == item.find(":")) continue;
+			auto vct_feilds = rl_split(item, ":");
+			Table_Item item_new;
+			item_new.cls = vct_feilds[1];
+			item_new.label = vct_feilds[0];
+			if (std::string::npos != item_new.cls.find("="))
+			{
+				item_new.cls = item_new.cls.substr(0, item_new.cls.find("="));
+			}
+
+			// Array
+			if (std::string::npos != item_new.cls.find("["))
+			{
+				item_new.array = true;
+				rl_replace(item_new.cls, "[", "");
+				rl_replace(item_new.cls, "]", "");
+			}
+			if ("string" == item_new.cls) item_new.type = CT_Str;
+			else if (isInMapK(m_map_enum, item_new.cls)) item_new.type = CT_Enum;
+			else if (isInMapK(m_map_cls_name_cpp, item_new.cls)) item_new.type = CT_Normal;
+			else item_new.type = CT_Table;
+
+			t.items.push_back(item_new);
+		}
+	}
+}
 
 std::string reader::build(const Reader_Type &type)
 {

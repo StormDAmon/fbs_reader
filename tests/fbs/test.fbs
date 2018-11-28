@@ -20,6 +20,8 @@ table Pair
 table Account
 {
 	lang: Language;
+	langs: [Language];
+	extra: Pair;
     extras: [Pair];
 	
 	test_str: string;

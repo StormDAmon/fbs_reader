@@ -9,7 +9,7 @@
 
 std::string reader::build_cpp()
 {
-	std::vector<TABLE> vct_table = m_vct_table;
+	std::vector<Table> vct_table = m_vct_table;
 
 	// 翻译块
 	for (auto &table : vct_table)
@@ -47,25 +47,26 @@ std::string reader::build_cpp()
 		rl_replace(str_data, " ", "");
 
 		auto vct_items = rl_split(str_data, ";");
-		std::vector<TABLE_ITEM> vct_items_fix;
+		std::vector<Table_Item> vct_items_fix;
 		for (auto item : vct_items)
 		{
 			if (std::string::npos == item.find(":")) continue;
 			auto vct_feilds = rl_split(item, ":");
-			TABLE_ITEM item_new;
+			Table_Item item_new;
 			item_new.cls = vct_feilds[1];
 			item_new.label = vct_feilds[0];
 			if (std::string::npos != item_new.cls.find("="))
 			{
 				item_new.cls = item_new.cls.substr(0, item_new.cls.find("="));
 			}
-			if (in_m_key(m_map_cls_name_cpp, item_new.cls)) item_new.cls = m_map_cls_name_cpp[item_new.cls];
+			if (isInMapK(m_map_cls_name_cpp, item_new.cls)) item_new.cls = m_map_cls_name_cpp[item_new.cls];
 			else if (m_map_enum.end() != m_map_enum.find(item_new.cls)) item_new.cls = m_str_namespace + "::" + item_new.cls;
 
 			vct_items_fix.push_back(item_new);
 		}
 
 		// 开始生成 struct
+		table.reader.clear();
 		table.reader = "struct " + table.name + "\n";
 		table.reader += "{\n";
 		for (auto &item : vct_items_fix)
@@ -74,7 +75,7 @@ std::string reader::build_cpp()
 			{
 				rl_replace(item.cls, "[", "");
 				rl_replace(item.cls, "]", "");
-				if (in_m_key(m_map_cls_name_cpp, item.cls)) item.cls = m_map_cls_name_cpp[item.cls];
+				if (isInMapK(m_map_cls_name_cpp, item.cls)) item.cls = m_map_cls_name_cpp[item.cls];
 				if (m_map_enum.end() != m_map_enum.find(item.cls)) item.cls = m_str_namespace + "::" + item.cls;
 				item.cls = "std::vector<" + item.cls + ">";
 			}
@@ -435,7 +436,7 @@ static std::string EnumNameSafe(const char **arr, const int nValue)\n\
 	str_out += "\n\n";
 
 	// 填充结构体
-	std::vector<TABLE> vct_table_tmp;
+	std::vector<Table> vct_table_tmp;
 	for (auto table : vct_table)
 	{
 		bool b_insert = false;

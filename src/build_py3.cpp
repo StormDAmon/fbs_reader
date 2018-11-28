@@ -5,327 +5,256 @@
 //
 #include "reader.h"
 
-
-std::string str_big_first_one(std::string &str)
+// 转换 Python 变量名
+std::string namePy(const std::string &str)
 {
-    if (str.empty()) return str;
+    if (str.empty()) return "";
+	std::string str_;
+	bool bTurnBig = true;
+	for (auto c : str)
+	{
+		if (bTurnBig)
+		{
+			if ('a' <= c && c <= 'z') c += 'A' - 'a';
+			bTurnBig = false;
+		}
 
-
-    return str;
+		if (('a' > c || c > 'z') && 
+			('A' > c || c > 'Z'))
+		{
+			bTurnBig = true;
+			if ('0' > c || c > '9') continue;
+		}
+		str_ += c;
+	}
+    return str_;
 }
 
+std::string strLower(const std::string &str)
+{
+	std::string str_ = str;
+	transform(str_.begin(), str_.end(), str_.begin(), ::tolower);
+	return str_;
+}
 
 std::string reader::build_py3()
 {
-	std::vector<TABLE> vct_table = m_vct_table;
+	std::vector<Table> vct_table = m_vct_table;
 
 	// 翻译块
-	for (auto &table : vct_table)
+	for (auto &t : vct_table)
 	{
-		// items
-		auto vct_tmp = rl_split(table.base, "{");
-		std::string str_data = vct_tmp[1];
-		rl_replace(str_data, "}", "");
-
-		std::string str_tmp = str_data;
-		str_data.clear();
-		std::string str_begin_flag;
-		for (auto iter = str_tmp.begin(); iter != str_tmp.end(); iter++)
+		std::stringstream out;
+		// 开始生成 Table
+		out << "import " << m_str_namespace << "." << namePy(t.name) << "\n";
+		out << "class " << namePy(t.name) << "(object):\n";
+		for (auto i : t.items)
 		{
-			if (str_begin_flag.empty())
+			out << "\t" << i.label << " = ";
+			if (i.array) out << "[]";
+			else
 			{
-				if (is_match("/*", iter)) str_begin_flag = "/*";
-				else if (is_match("//", iter)) str_begin_flag = "//";
-			}
-			if (str_begin_flag.size())
-			{
-				if (BOTH("/*", "*/") || BOTH_2E("//", "\n", "\r\n"))
+				switch(i.type)
 				{
-					if (BOTH("/*", "*/")) iter++;
-					str_begin_flag.clear();
+					case CT_Str:
+					case CT_Normal: out << m_map_cls_name_py3[i.cls]; break;
+					case CT_Table: 	out << i.cls << "()"; break;
+					case CT_Enum:
+					{
+						out << m_str_namespace << "." << i.cls << "." << i.cls << "." << *m_map_enum[i.cls].begin();
+						break;
+					}
+					default: break;
 				}
-				continue;
 			}
-			str_data += *iter;
+			out << "\n";
 		}
+		out << "\n";
 
-		rl_replace(str_data, "\r\n", "");
-		rl_replace(str_data, "\n", "");
-		rl_replace(str_data, "\t", "");
-		rl_replace(str_data, " ", "");
-
-		auto vct_items = rl_split(str_data, ";");
-		std::vector<TABLE_ITEM> vct_items_fix;
-		for (auto item : vct_items)
+        // __init__()
+		out << "\tdef __init__(self, buf=None):\n";
+		out << "\t\tif None == buf:\n";
+		out << "\t\t\treturn\n";
+		out << "\t\tfbs = buf\n";
+		out << "\t\tif 'bytearray' == type(buf).__name__:\n";
+		out << "\t\t\tfbs = " << m_str_namespace << "." << namePy(t.name) << "." << namePy(t.name) << ".GetRootAs" << namePy(t.name) << "(buf, 0)\n";
+		for (auto i : t.items)
 		{
-			if (std::string::npos == item.find(":")) continue;
-			auto vct_feilds = rl_split(item, ":");
-			TABLE_ITEM item_new;
-			item_new.cls = vct_feilds[1];
-			item_new.label = vct_feilds[0];
-			if (std::string::npos != item_new.cls.find("="))
+			out << "\t\tself." << i.label << " = ";
+			if (i.array)
 			{
-				item_new.cls = item_new.cls.substr(0, item_new.cls.find("="));
-			}
-			if (in_m_key(m_map_cls_name_py3, item_new.cls)) item_new.cls = m_map_cls_name_py3[item_new.cls];
-			else if (m_map_enum.end() != m_map_enum.find(item_new.cls)) item_new.cls = m_str_namespace + "::" + item_new.cls;
-
-			vct_items_fix.push_back(item_new);
-		}
-
-		// 开始生成 cls
-		table.reader = "import " + m_str_namespace + "." + table.name + "\n";
-		table.reader = "class " + table.name + "(object):\n";
-		for (auto &item : vct_items_fix)
-		{
-			if (std::string::npos != item.cls.find("[")) item.cls = "list()";
-			table.reader += "\t" + item.label + " = " + item.cls + "\n";
-		}
-		table.reader += "\n";
-
-        // init()
-		table.reader += "\tdef __init__(self, buf=None):\n\
-\t\tif None == buf:\n\
-\t\t\treturn\n";
-        table.reader += "\t\t" + table.name + " = " + m_str_namespace + ".";
-		for (auto item : vct_items_fix)
-		{
-			if ((std::string::npos != item.cls.find("int") ||
-				std::string::npos != item.cls.find("INT") ||
-				std::string::npos != item.cls.find("long")) && 
-				std::string::npos == item.cls.find("std::vector"))
-			{
-				table.reader += "\t\t" + item.label + " = 0;\n";
-			}
-			else if (std::string::npos != item.cls.find("float") &&
-				std::string::npos == item.cls.find("std::vector"))
-			{
-				table.reader += "\t\t" + item.label + " = 0.0;\n";
-			}
-			else if (std::string::npos != item.cls.find(m_str_namespace + "::") &&
-				std::string::npos == item.cls.find("std::vector"))
-			{
-				std::string str_value = m_map_enum[item.cls.substr(item.cls.rfind(":") + 1, item.cls.size() - m_str_namespace.size() - 2)][0];
-				rl_replace(str_value, "\r\n", "");
-				rl_replace(str_value, "\n", "");
-				rl_replace(str_value, "\t", "");
-				table.reader += "\t\t" + item.label + " = " + item.cls + "_" + str_value + ";\n";
-			}
-		}
-		table.reader += "\t}\n";
-
-		table.reader += "\t" + table.name + "(const " + table.name + " &src)\n\
-\t{\n";
-		for (auto item : vct_items_fix)
-		{
-			table.reader += "\t\t" + item.label + " = src." + item.label + ";\n";
-		}
-		table.reader += "\t}\n";
-		table.reader += "\
-\t" + table.name + "(const void *ptr_data, const size_t n_len)\n\
-\t{\n\
-\t\tif (!verify(ptr_data, n_len))\n\
-\t\t{\n\
-\t\t\t*this = " + table.name + "();\n\
-\t\t\treturn;\n\
-\t\t}\n\
-\t\tREAD_FBS(fbs_obj, " + m_str_namespace + "::" + table.name + ", ptr_data, n_len);\n\
-\t\t*this = " + table.name + "(fbs_obj);\n\
-\t}\n";
-		table.reader += "\t" + table.name + "(const " + m_str_namespace + "::" + table.name + " *ptr_fbs)\n";
-		table.reader += "\t{\n";
-		table.reader += "\t\tif (!ptr_fbs) return;\n";
-		for (auto item : vct_items_fix)
-		{
-			table.reader += "\t\t";
-			if ("std::string" == item.cls)
-			{
-				table.reader += item.label + " = GX3(ptr_fbs, " + item.label + "(), c_str(), \"\")";
-			}
-			else if (std::string::npos != item.cls.find("std::vector"))
-			{
-				std::string str_cls = item.cls.substr(12, item.cls.size() - 12 - 1);
-				if (std::string::npos != str_cls.find(m_str_namespace))
+				if (CT_Table == i.type) 
 				{
-					str_cls = str_cls.substr(str_cls.rfind(":") + 1, str_cls.size() - str_cls.rfind(":"));
+					out << "read_vct_cls(fbs, '" << namePy(i.label) << "', '" << namePy(i.cls) << "')";
 				}
-				if ("std::string" == str_cls)
-				{
-					table.reader += item.label + " = read_vct_str<" + str_cls + ", flatbuffers::String>(ptr_fbs->" + item.label + "())";
-				}
-				else if (m_map_enum.end() != m_map_enum.find(str_cls))
-				{
-					table.reader += item.label + " = read_vct_enum<" + m_str_namespace + "::" + str_cls + ", " + "uint8_t>(ptr_fbs->" + item.label + "())";
-				}
-				else if (!in_m_value(m_map_cls_name_py3, str_cls))
-				{
-					table.reader += item.label + " = read_vct<" + str_cls + ", " + m_str_namespace + "::" + str_cls + ">(ptr_fbs->" + item.label + "())";
-				}
-				else
-				{
-					std::string str_cls_tmp = str_cls;
-					if ("bool" == str_cls_tmp) str_cls_tmp = "uint8_t";
-					table.reader += item.label + " = read_vct_enum<" + str_cls + ", " + str_cls_tmp + ">(ptr_fbs->" + item.label + "())";
-				}
+				else out << "read_vct(fbs, '" << namePy(i.label) << "')";
 			}
 			else
 			{
-				table.reader += item.label + " = ptr_fbs->" + item.label + "()";
+				if (CT_Table == i.type) out << i.cls << "(";
+				else if (CT_Str == i.type) out << "read_str(";
+				out << "fbs." << namePy(i.label) << "()";
+				switch(i.type)
+				{
+					case CT_Str:
+					case CT_Table: out << ")"; break;
+					case CT_Normal: 
+					case CT_Enum:
+					default: break;
+				}
 			}
-			table.reader += ";\n";
+			out << "\n";
 		}
-		table.reader += "\t}\n";
-		table.reader += "\tbool verify(const void* ptr_fbs, const size_t n_len)\n\
-\t{\n\
-\t\treturn fbs_verify_table<" + m_str_namespace + "::" + table.name + ">(ptr_fbs, n_len);\n\
-\t}\n";
-		table.reader += "\tflatbuffers::Offset<" + m_str_namespace + "::" + table.name + "> to_fbs(flatbuffers::FlatBufferBuilder &fb)\n";
-		table.reader += "\t{\n";
-		table.reader += "\t\treturn " + m_str_namespace + "::Create" + table.name + "(fb,";
-		std::vector<std::string> vct_params;
-		for (auto item : vct_items_fix)
-		{
-			if ("std::string" == item.cls) vct_params.push_back(" fs(" + item.label + ")");
-			else if (std::string::npos != item.cls.find("std::vector"))
-			{
-				std::string str_cls = item.cls.substr(12, item.cls.size() - 12 - 1);
-				if (std::string::npos != str_cls.find(m_str_namespace))
-				{
-					str_cls = str_cls.substr(str_cls.rfind(":") + 1, str_cls.size() - str_cls.rfind(":"));
-				}
-				if ("std::string" == str_cls)
-				{
-					vct_params.push_back(" build_vct_str<" + str_cls + ", flatbuffers::String>(fb, " + item.label + ")");
-				}
-				else if (m_map_enum.end() != m_map_enum.find(str_cls))
-				{
-					vct_params.push_back(" build_vct_enum<" + m_str_namespace + "::" + str_cls + ", uint8_t>(fb, " + item.label + ")");
-				}
-				else if (!in_m_value(m_map_cls_name_py3, str_cls))
-				{
-					vct_params.push_back(" build_vct<" + str_cls + ", " + m_str_namespace + "::" + str_cls + ">(fb, " + item.label + ")");
-				}
-				else
-				{
-					std::string str_cls_tmp = str_cls;
-					if ("bool" == str_cls_tmp) str_cls_tmp = "uint8_t";
-					vct_params.push_back(" build_vct_enum<" + str_cls + ", " + str_cls_tmp + ">(fb, " + item.label + ")");
-				}
-			}
-			else if (in_m_value(m_map_cls_name_py3, item.cls) ||
-				std::string::npos != item.cls.find(m_str_namespace + "::")) vct_params.push_back(" " + item.label);
-			else if (m_map_enum.end() != m_map_enum.find(item.cls)) vct_params.push_back(" " + item.label);
-			else vct_params.push_back(" " + item.label + ".to_fbs(fb)");
-		}
-		table.reader += rl_join(vct_params, ",");
-		table.reader += ");\n";
-		table.reader += "\t}\n";
-		table.reader += "\tstd::string to_json(const bool b_simplify = false)\n";
-		table.reader += "\t{\n";
-		table.reader += "\t\tstd::stringstream ss;\n";
-		table.reader += "\t\tss << \"{\";\n";
-		for (auto iter = vct_items_fix.begin(); iter != vct_items_fix.end(); iter++)
-		{
-			std::string str_value;
-			std::string str_cls = iter->cls;
-			std::string str_simplify;
-			if (std::string::npos != str_cls.find("std::vector"))
-			{
-				str_cls = str_cls.substr(12, str_cls.size() - 12 - 1);
-				str_value = " << read_vct_2_json<" + str_cls + ">(" + iter->label + ")";
-			}
-			else if (m_map_enum.end() != m_map_enum.find(str_cls.substr(str_cls.rfind(":") + 1, str_cls.size() - str_cls.rfind(":"))))
-			{
-				str_value = " << \"\\\"\" << EnumName" + str_cls.substr(str_cls.rfind(":") + 1, str_cls.size() - str_cls.rfind(":")) + "(" + iter->label + ") << \"\\\"\"";
-			}
-			else if (!in_m_value(m_map_cls_name_py3, str_cls) && 
-				std::string::npos == str_cls.find("::") ||
-				std::string::npos != str_cls.find("std::string"))
-			{
-				str_value = " << " + iter->label + ".to_json(b_simplify)";
-				if (std::string::npos != str_cls.find("std::string"))
-				{
-					str_value = " << \"\\\"\" << " + iter->label + " << \"\\\"\"";
-				}
-			}
-			else if (std::string::npos != str_cls.find("int") ||
-				std::string::npos != str_cls.find("INT") ||
-				std::string::npos != str_cls.find("long"))
-			{
-				str_value = " << (" + str_cls + ")" + iter->label;
-			}
-			else str_value = " << \"\\\"\" << (" + str_cls + ")" + iter->label + " << \"\\\"\"";
+		out << "\n";
 
-			if (std::string::npos != iter->cls.find("std::vector") ||
-				std::string::npos != iter->cls.find("std::string"))
+		// to_fbs()
+		out << "\tdef to_fbs(self, fb=None):\n";
+		out << "\t\tis_finish = False\n";
+		out << "\t\tif None == fb:\n";
+		out << "\t\t\tis_finish = True\n";
+		out << "\t\t\tfb = flatbuffers.Builder(0)\n";
+		for (auto i : t.items)
+		{
+			if (i.array)
 			{
-				str_simplify = iter->label + ".size()";
+				std::string strFuncName = "";
+				switch(i.type)
+				{
+					case CT_Str: strFuncName = "build_vct_str"; break;
+					case CT_Table: strFuncName = "build_vct_cls"; break;
+					case CT_Normal: 
+					{
+						if ("byte" == i.cls) 		strFuncName = "build_vct_byte";
+						else if ("ubyte" == i.cls) 	strFuncName = "build_vct_ubyte";
+						else if ("short" == i.cls) 	strFuncName = "build_vct_short";
+						else if ("ushort" == i.cls) strFuncName = "build_vct_ushort";
+						else if ("int" == i.cls) 	strFuncName = "build_vct_int";
+						else if ("uint" == i.cls) 	strFuncName = "build_vct_uint";
+						else if ("long" == i.cls) 	strFuncName = "build_vct_long";
+						else if ("ulong" == i.cls) 	strFuncName = "build_vct_ulong";
+						else if ("float" == i.cls) 	strFuncName = "build_vct_float";
+						else if ("bool" == i.cls) 	strFuncName = "build_vct_bool";
+						break;
+					}
+					case CT_Enum: strFuncName = "build_vct_enum"; break;
+					default: break;
+				}
+				out << "\t\t_" << i.label << " = " << strFuncName << "(fb, self." << i.label << ", " << m_str_namespace << "." << namePy(t.name) << "." << namePy(t.name) << "Start" << namePy(i.label) << "Vector)\n";
 			}
-			if (str_simplify.size()) str_simplify = "if (!b_simplify || (b_simplify && " + str_simplify + ")) ";
-
-			table.reader += "\t\t" + str_simplify + "ss << \"\\\"" + iter->label + "\\\":\"" + str_value;
-			table.reader += " << \",\";\n";
+			else if (CT_Str == i.type)
+			{
+				out << "\t\t_" << i.label << " = fs(fb, self." << i.label << ")\n";
+			}
+			else if (CT_Table == i.type)
+			{
+				out << "\t\t_" << i.label << " = self." << i.label << ".to_fbs(fb)\n";
+			}
 		}
-		table.reader += "\t\tss_cut_back_c(ss);\n";
-		table.reader += "\t\tss << \"}\";\n";
-		table.reader += "\t\treturn ss.str();\n";
-		table.reader += "\t}\n";
-		table.reader += "\
-\tfriend std::ostream& operator << (std::ostream &ss, " + table.name + " &data)\n\
-\t{\n\
-\t\tss << data.to_json();\n\
-\t\treturn ss;\n\
-\t}\n";
-		table.reader += "};";
+		out << "\n";
+
+		out << "\t\t" << m_str_namespace << "." << namePy(t.name) << "." << namePy(t.name) << "Start(fb)\n";
+		for (auto i : t.items)
+		{
+			out << "\t\t" << m_str_namespace << "." << namePy(t.name) << "." << namePy(t.name) << "Add" << namePy(i.label) << "(fb, ";
+			if (i.array || CT_Str == i.type || CT_Table == i.type) out << "_";
+			else out << "self.";
+			out << i.label << ")\n";
+		}
+		out << "\t\tif is_finish:\n";
+		out << "\t\t\tfb.Finish(" << m_str_namespace << "." << namePy(t.name) << "." << namePy(t.name) << "End(fb))\n";
+		out << "\t\t\treturn fb.Output()\n";
+		out << "\t\treturn " << m_str_namespace << "." << namePy(t.name) << "." << namePy(t.name) << "End(fb)\n";
+		out << "\n";
+
+		t.reader = out.str();
 	}
 
 
 	// 填充
-	std::string str_out = "import flatbuffers\n\
-\n\
-def fs(fb, str):\n\
+	std::stringstream out;
+	out << "import flatbuffers\n\n";
+	out << "def read_str(fb):\n\
+\tif None == fb:\n\
+\t\treturn ''\n\
+\treturn fb.decode('utf-8')\n";
+	out << "def read_vct(fb, name):\n\
+\tl = []\n\
+\tfor i in range(eval('fb.%sLength()' % name)):\n\
+\t\tl.append(eval('fb.%s(%d)' % (name, i)))\n\
+\treturn l\n";
+	out << "def read_vct_cls(fb, name, cls):\n\
+\tl = []\n\
+\tfor i in range(eval('fb.%sLength()' % name)):\n\
+\t\tl.append(eval('%s(fb.%s(%d))' % (cls, name, i)))\n\
+\treturn l\n";
+	out << "def fs(fb, str):\n\
 \tif 0 == len(str):\n\
 \t\treturn 0\n\
-\treturn fb.CreateString(str)\n\
-\n\
-def read_vct(func, length):\n\
-\tl = []\n\
-\tfor i in range(length):\n\
-\t\tl.append(func(i))\n\
-\treturn l\n\
-\n\
-def build_vct_cls(fb, list, func_start):\n\
+\treturn fb.CreateString(str)\n";
+	out << "def build_vct(fb, list, func_start, t):\n";
+	out << "\tlength = len(list)\n";
+	out << "\tl = []\n";
+	out << "\tfor i in list:\n";
+	out << "\t\tl.insert(0, i)\n";
+	out << "\tfunc_start(fb, length)\n";
+	out << "\tfor i in l:\n";
+	out << "\t\teval('fb.Prepend%s(%d)' % (t, i))\n";
+	out << "\treturn fb.EndVector(length)\n";
+	out << "def build_vct_bool(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Bool')\n";
+	out << "def build_vct_enum(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Byte')\n";
+	out << "def build_vct_byte(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Byte')\n";
+	out << "def build_vct_ubyte(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Uint8')\n";
+	out << "def build_vct_short(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Int16')\n";
+	out << "def build_vct_ushort(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Uint16')\n";
+	out << "def build_vct_int(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Int32')\n";
+	out << "def build_vct_uint(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Uint32')\n";
+	out << "def build_vct_long(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Int64')\n";
+	out << "def build_vct_ulong(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Uint64')\n";
+	out << "def build_vct_float(fb, list, func_start):\n";
+	out << "\treturn build_vct(fb, list, func_start, 'Float64')\n";
+	out << "def build_vct_cls(fb, list, func_start):\n\
 \tlength = len(list)\n\
 \tl = []\n\
 \tfor i in list:\n\
-\t\tl.append(i.to_fbs(fb))\n\
+\t\tl.insert(0, i.to_fbs(fb))\n\
 \tfunc_start(fb, length)\n\
 \tfor i in l:\n\
 \t\tfb.PrependUOffsetTRelative(i)\n\
-\treturn fb.EndVector(length)\n\n\n\n";
+\treturn fb.EndVector(length)";
+	out << "\n";
+	out << "def build_vct_str(fb, list, func_start):\n\
+\tlength = len(list)\n\
+\tl = []\n\
+\tfor i in list:\n\
+\t\tl.insert(0, fs(fb, i))\n\
+\tfunc_start(fb, length)\n\
+\tfor i in l:\n\
+\t\tfb.PrependUOffsetTRelative(i)\n\
+\treturn fb.EndVector(length)";
+	out << "\n\n\n\n";
+
+	for (auto e : m_map_enum)
+	{
+		out << "import " + m_str_namespace + "." + namePy(e.first) + "\n";
+	}
+	out << "\n\n\n\n";
 
 	// 填充结构体
-	std::vector<TABLE> vct_table_tmp;
-	for (auto table : vct_table)
+	for (auto t : vct_table)
 	{
-		bool b_insert = false;
-		for (auto iter = vct_table_tmp.begin(); iter != vct_table_tmp.end(); iter++)
-		{
-			if (std::string::npos != iter->reader.find(table.name + " "))
-			{
-				vct_table_tmp.insert(iter, table);
-				b_insert = true;
-				break;
-			}
-		}
-		if (!b_insert) vct_table_tmp.push_back(table);
+		out << t.reader + "\n\n";
 	}
 
-	for (auto table : vct_table_tmp)
-	{
-		str_out += table.reader + "\n\n";
-	}
-
-	return str_out;
+	return out.str();
 }
 

@@ -9,8 +9,8 @@ endif (CMAKE_BUILD_TYPE MATCHES "Debug")
 
 message("-- Current Mode: " ${CMAKE_BUILD_TYPE})
 
-SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O -Wall -g -ggdb")
-SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O -w -g -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -w")
 
 add_definitions(-std=c++11)
 add_definitions(-D__LINUX__=1)

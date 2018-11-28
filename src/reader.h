@@ -6,6 +6,7 @@
 
 #pragma once
 #include <string>
+#include <sstream>
 #include <queue>
 #include <map>
 #include <vector>
@@ -26,17 +27,32 @@
 #endif
 
 
-struct TABLE_ITEM
+enum Cls_Type
 {
+	CT_Normal = 0,
+	CT_Str,
+	CT_Enum,
+	CT_Table
+};
+struct Table_Item
+{
+	bool array;
+	Cls_Type type;
 	std::string cls;
 	std::string label;
+	Table_Item()
+	{
+		array = false;
+		type = CT_Normal;
+	}
 };
-struct TABLE
+struct Table
 {
-	std::string name;
-	std::vector<TABLE_ITEM> items;
 	std::string base;
 	std::string reader;
+
+	std::string name;
+	std::vector<Table_Item> items;
 };
 
 enum Reader_Type
@@ -57,6 +73,7 @@ public:
 
 	// 生成 reader
 	bool load(const std::string &str_path);
+	void transTable();
 	std::string build(const Reader_Type &type);
 	std::string build_cpp();
 	std::string build_py2() { return ""; };
@@ -82,7 +99,7 @@ private:
 
 	std::string m_str_namespace;	// 命名空间
 	std::map<std::string, std::vector<std::string> > m_map_enum;	// 枚举映射
-	std::vector<TABLE> m_vct_table;	// 列表
+	std::vector<Table> m_vct_table;	// 列表
 
 };
 
@@ -99,12 +116,7 @@ static bool is_match(const std::string &str, std::string::iterator &iter)
 	return true;
 }
 
-
-static bool in_m_key(std::map<std::string, std::string> &map, const std::string &str)
-{
-	if (map.end() != map.find(str)) return true;
-	return false;
-}
+#define isInMapK(map, i) map.end() != map.find(i)
 
 static bool in_m_value(std::map<std::string, std::string> &map, const std::string &str)
 {
