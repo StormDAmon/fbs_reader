@@ -429,14 +429,14 @@ static int EnumNameSafe(const char **arr, const std::string &strName)\n\
 {\n\
 	int nValue = 0;\n\
 	int i = 0;\n\
-	while (true)\n\
+	while (nullptr != arr[i])\n\
 	{\n\
-		if (nullptr == arr[i]) break;\n\
-		if (arr[i++] == strName)\n\
+		if (arr[i] == strName)\n\
 		{\n\
 			nValue = i;\n\
 			break;\n\
 		}\n\
+		i++;\n\
 	}\n\
 	return nValue;\n\
 }\n\
