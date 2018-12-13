@@ -46,8 +46,8 @@ std::string reader::build_py3()
 	{
 		std::stringstream out;
 		// 开始生成 Table
-		out << "import " << m_str_namespace << "." << namePy(t.name) << "\n";
-		out << "class " << namePy(t.name) << "(object):\n";
+		out << "import " << m_str_namespace << "." << t.name << "\n";
+		out << "class " << t.name << "(object):\n";
 		for (auto i : t.items)
 		{
 			out << "\t" << i.label << " = ";
@@ -93,7 +93,9 @@ std::string reader::build_py3()
 			{
 				if (CT_Table == i.type) out << i.cls << "(";
 				else if (CT_Str == i.type) out << "read_str(";
-				out << "fbs." << namePy(i.label) << "()";
+
+				if (CT_Table == i.type) out << "fbs." << i.label << "()";
+				else out << "fbs." << namePy(i.label) << "()";
 				switch(i.type)
 				{
 					case CT_Str:
@@ -245,12 +247,28 @@ std::string reader::build_py3()
 
 	for (auto e : m_map_enum)
 	{
-		out << "import " + m_str_namespace + "." + namePy(e.first) + "\n";
+		out << "import " + m_str_namespace + "." + e.first + "\n";
 	}
 	out << "\n\n\n\n";
 
 	// 填充结构体
-	for (auto t : vct_table)
+	std::vector<Table> vct_table_tmp;
+	for (auto table : vct_table)
+	{
+		bool b_insert = false;
+		for (auto iter = vct_table_tmp.begin(); iter != vct_table_tmp.end(); iter++)
+		{
+			if (std::string::npos != iter->reader.find(" = " + table.name + "("))
+			{
+				vct_table_tmp.insert(iter, table);
+				b_insert = true;
+				break;
+			}
+		}
+		if (!b_insert) vct_table_tmp.push_back(table);
+	}
+	
+	for (auto t : vct_table_tmp)
 	{
 		out << t.reader + "\n\n";
 	}

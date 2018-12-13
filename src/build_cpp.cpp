@@ -425,6 +425,17 @@ static std::string EnumNameSafe(const char **arr, const int nValue)\n\
 	if (nValue > nLen - 2) return \"\";\n\
 	return arr[nValue];\n\
 }\n\
+static int EnumNameSafe(const char **arr, const std::string &strName)\n\
+{\n\
+	int nValue = 0;\n\
+	int i = 0;\n\
+	while (true)\n\
+	{\n\
+		if (nullptr == arr[i]) break;\n\
+		if (arr[i] == strName) break;\n\
+	}\n\
+	return nValue;\n\
+}\n\
 \n\n\n";
 
 	// 填充结构体声明
