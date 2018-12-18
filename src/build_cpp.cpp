@@ -321,6 +321,8 @@ namespace FR\n\
 	fb.Finish(fr.to_fbs(fb))\n\
 #endif\n\
 \n\
+#ifndef FR_FUNC\n\
+#	define FR_FUNC\n\
 static std::stringstream& ss_cut_back_c(std::stringstream &ss)\n\
 {\n\
 \tstd::string str = ss.str(); \n\
@@ -440,6 +442,7 @@ static int EnumNameSafe(const char **arr, const std::string &strName)\n\
 	}\n\
 	return nValue;\n\
 }\n\
+#endif\n\
 \n\n\n";
 
 	// 填充结构体声明
