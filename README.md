@@ -9,9 +9,11 @@
 
 ### 编译
 
+**Linux or macOS:**
 ``` shell
 mkdir build && cd build && cmake ..
 make
+make install
 ```
 
 
