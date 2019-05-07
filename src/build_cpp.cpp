@@ -268,7 +268,7 @@ std::string reader::build_cpp()
 		table.reader += "\t\treturn ss.str();\n";
 		table.reader += "\t}\n";
 		table.reader += "\
-\tfriend std::ostream& operator << (std::ostream &ss, " + table.name + " &data)\n\
+\tfriend std::ostream& operator <<(std::ostream &ss, " + table.name + " &data)\n\
 \t{\n\
 \t\tss << data.toJson(true);\n\
 \t\treturn ss;\n\

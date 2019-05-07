@@ -27,7 +27,29 @@
 			"iterator": "cpp",
 			"ios": "cpp",
 			"deque": "cpp",
-			"set": "cpp"
+			"set": "cpp",
+			"clocale": "cpp",
+			"array": "cpp",
+			"*.tcc": "cpp",
+			"cctype": "cpp",
+			"cmath": "cpp",
+			"cstdint": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cwchar": "cpp",
+			"cwctype": "cpp",
+			"unordered_map": "cpp",
+			"system_error": "cpp",
+			"utility": "cpp",
+			"fstream": "cpp",
+			"iostream": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"optional": "cpp",
+			"ostream": "cpp",
+			"sstream": "cpp",
+			"streambuf": "cpp",
+			"tuple": "cpp"
 		}
 	}
 }
