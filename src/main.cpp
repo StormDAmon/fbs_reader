@@ -6,17 +6,20 @@
 #include "reader.h"
 #include "rl_path.h"
 
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
 	if (2 != argc) return -1;
-	std::string str_path = argv[1];
-	if (std::string::npos == str_path.find(":"))
+	std::string strPath = argv[1];
+	std::cout << "argv: " << strPath << std::endl;
+	if (std::string::npos == strPath.find(":") && '/' != strPath[0])
 	{
-		str_path = get_run_path() + PATH_L + str_path;
+		strPath = get_run_path() + PATH_L + strPath;
 	}
+	std::cout << "will build file: " << strPath << std::endl;
 
-	if (!reader::ins()->load(str_path)) return -1;
+	if (!reader::ins()->load(strPath)) return -1;
 
 	reader::ins()->save(CPP, reader::ins()->build(CPP));
 	reader::ins()->save(Python3, reader::ins()->build(Python3));

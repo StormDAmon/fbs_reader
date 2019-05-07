@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(fbs_reader VERSION "1.0.0")
 
+set(CMAKE_BUILD_TYPE "Release")
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
     add_definitions(-DDEBUG)
 else()
