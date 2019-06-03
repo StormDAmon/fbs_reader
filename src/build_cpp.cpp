@@ -110,9 +110,12 @@ std::string reader::build_cpp()
 			}
 		}
 		table.reader += "\t}\n";
-
-		table.reader += "\t" + table.name + "(const " + table.name + " &src)\n\
-\t{\n";
+		table.reader += "\t" + table.name + "(const std::string& str)\n";
+		table.reader += "\t{\n";
+		table.reader += "\t\t" + table.name + "(str.data(), str.size());\n";
+		table.reader += "\t}\n";
+		table.reader += "\t" + table.name + "(const " + table.name + " &src)\n";
+		table.reader += "\t{\n";
 		for (auto item : vct_items_fix)
 		{
 			table.reader += "\t\t" + item.label + " = src." + item.label + ";\n";
@@ -217,6 +220,14 @@ std::string reader::build_cpp()
 		table.reader += "\n\t\t\t";
 		table.reader += rl_join(vct_params, ",\n\t\t\t");
 		table.reader += ");\n";
+		table.reader += "\t}\n";
+		table.reader += "\tstd::string toStr()\n";
+		table.reader += "\t{\n";
+		table.reader += "\t\tflatbuffers::FlatBufferBuilder fb;\n";
+		table.reader += "\t\tfb.Finish(toFbs(fb));\n";
+		table.reader += "\t\tstd::string str(fb.GetSize(), 0);\n";
+		table.reader += "\t\tmemcpy((void*)str.data(), fb.GetBufferPointer(), fb.GetSize());\n";
+		table.reader += "\t\treturn str;\n";
 		table.reader += "\t}\n";
 		table.reader += "\tstd::string toJson(const bool bSimplify = false)\n";
 		table.reader += "\t{\n";

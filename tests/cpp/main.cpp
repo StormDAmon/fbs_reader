@@ -27,6 +27,8 @@ int main()
 	
 
 	BUILD_FBS(fb, acc);
+	std::string str(fb.GetSize(), 0);
+	memcpy((void*)str.data(), fb.GetBufferPointer(), fb.GetSize());
 	
 	
 	FR::Account acc_tmp(fb.GetBufferPointer(), fb.GetSize());

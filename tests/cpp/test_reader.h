@@ -164,6 +164,10 @@ struct Pair
 	Pair()
 	{
 	}
+	Pair(const std::string& str)
+	{
+		Pair(str.data(), str.size());
+	}
 	Pair(const Pair &src)
 	{
 		first = src.first;
