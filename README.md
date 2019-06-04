@@ -11,9 +11,15 @@
 
 **Linux or macOS:**
 ``` shell
-mkdir build && cd build && cmake ..
-make
-make install
+    git clone https://github.com/google/flatbuffers.git && cd flatbuffers
+    mkdir build && cd build
+    cmake ..
+    make && sudo make install
+    cd ../.. && rm -rf flatbuffers
+    
+    mkdir build && cd build && cmake ..
+    make
+    make install
 ```
 
 
