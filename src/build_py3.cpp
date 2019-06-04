@@ -3,6 +3,9 @@
 //
 //  Created by Storm DAmon on 2018/11/14.
 //
+
+#include <vector>
+#include <algorithm>
 #include "reader.h"
 
 // 转换 Python 变量名
