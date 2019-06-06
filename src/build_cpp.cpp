@@ -112,7 +112,7 @@ std::string reader::build_cpp()
 		table.reader += "\t}\n";
 		table.reader += "\t" + table.name + "(const std::string& str)\n";
 		table.reader += "\t{\n";
-		table.reader += "\t\t" + table.name + "(str.data(), str.size());\n";
+		table.reader += "\t\t*this = " + table.name + "(str.data(), str.size());\n";
 		table.reader += "\t}\n";
 		table.reader += "\t" + table.name + "(const " + table.name + " &src)\n";
 		table.reader += "\t{\n";
