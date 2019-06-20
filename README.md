@@ -12,7 +12,7 @@
 **Linux or macOS:**
 ``` shell
     git clone https://github.com/google/flatbuffers.git && cd flatbuffers
-    mkdir build && cd build
+    mkdir release && cd release
     cmake ..
     make && sudo make install
     cd ../.. && rm -rf flatbuffers
