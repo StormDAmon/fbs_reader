@@ -7,21 +7,28 @@
 - Python3
 
 
-### 编译
+## 安装使用
 
-**Linux or macOS:**
+### 安装依赖 - ubuntu
+``` shell
+    sudo apt install flac
+```
+
+### 安装依赖 - macOS
 ``` shell
     git clone https://github.com/google/flatbuffers.git && cd flatbuffers
     mkdir release && cd release
     cmake ..
     make && sudo make install
     cd ../.. && rm -rf flatbuffers
-    
+```
+
+### 安装
+``` shell
     mkdir build && cd build && cmake ..
     make
     make install
 ```
-
 
 
 
