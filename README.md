@@ -11,7 +11,7 @@
 
 ### 安装依赖 - ubuntu
 ``` shell
-    sudo apt install flac
+    sudo apt install flac build-essential
 ```
 
 ### 安装依赖 - macOS
@@ -27,7 +27,7 @@
 ``` shell
     mkdir build && cd build && cmake ..
     make
-    make install
+    sudo make install
 ```
 
 

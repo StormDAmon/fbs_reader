@@ -67,7 +67,9 @@ std::string reader::build_cpp()
 
 		// 开始生成 struct
 		table.reader.clear();
-		table.reader = "struct " + table.name + "\n";
+		table.reader = "#ifndef FR_" + table.name + "\n";
+		table.reader += "#define FR_" + table.name + "\n";
+		table.reader += "struct " + table.name + "\n";
 		table.reader += "{\n";
 		for (auto &item : vct_items_fix)
 		{
@@ -284,7 +286,8 @@ std::string reader::build_cpp()
 \t\tss << data.toJson(true);\n\
 \t\treturn ss;\n\
 \t}\n";
-		table.reader += "};";
+		table.reader += "};\n";
+		table.reader += "#endif\n";
 	}
 
 	// 填充宏
@@ -433,14 +436,14 @@ static flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Tf>>> buildVc
 	}\n\
 	return fv(vctFbs);\n\
 }\n\
-static std::string EnumNameSafe(const char **arr, const int nValue)\n\
+static std::string EnumNameSafe(const char* const *arr, const int nValue)\n\
 {\n\
 	int nLen = 0;\n\
 	while (true) if (nullptr == arr[nLen++]) break;\n\
 	if (nValue > nLen - 2) return \"\";\n\
 	return arr[nValue];\n\
 }\n\
-static int EnumNameSafe(const char **arr, const std::string &strName)\n\
+static int EnumNameSafe(const char* const *arr, const std::string &strName)\n\
 {\n\
 	int nValue = 0;\n\
 	int i = 0;\n\
