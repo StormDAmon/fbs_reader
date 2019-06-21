@@ -3,6 +3,7 @@
 //
 //  Created by Storm DAmon on 2018/11/7.
 //
+#include <iostream>
 #include "reader.h"
 
 
@@ -476,7 +477,7 @@ static int EnumNameSafe(const char* const *arr, const std::string &strName)\n\
 		bool b_insert = false;
 		for (auto iter = vct_table_tmp.begin(); iter != vct_table_tmp.end(); iter++)
 		{
-			if (std::string::npos != iter->reader.find(table.name + " "))
+			if (std::string::npos != iter->reader.find("\t" + table.name + " "))
 			{
 				vct_table_tmp.insert(iter, table);
 				b_insert = true;
