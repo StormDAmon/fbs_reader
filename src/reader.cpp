@@ -62,6 +62,13 @@ reader::reader()
 
 bool reader::load(const std::string &str_path)
 {
+	m_str_path.clear();
+	m_str_file_name.clear();
+	m_str_fbs.clear();
+	m_str_namespace.clear();
+	m_map_enum.clear();
+	m_vct_table.clear();
+
 	// 读文件
 	std::string str_reader;
 	std::ifstream file(str_path, std::ios::in);

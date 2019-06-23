@@ -9,12 +9,7 @@
 
 ## 安装使用
 
-### 安装依赖 - ubuntu
-``` shell
-    sudo apt install flac build-essential
-```
-
-### 安装依赖 - macOS
+### 安装依赖
 ``` shell
     git clone https://github.com/google/flatbuffers.git && cd flatbuffers
     mkdir release && cd release
@@ -25,7 +20,7 @@
 
 ### 安装
 ``` shell
-    mkdir build && cd build && cmake ..
+    rm -rf build && mkdir build && cd build && cmake ..
     make
     sudo make install
 ```
