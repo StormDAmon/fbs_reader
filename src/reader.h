@@ -97,6 +97,7 @@ private:
 	std::map<std::string, std::string> m_map_cls_name_py3;		// 类名映射 Python3
 	std::map<std::string, std::string> m_map_cls_name_njs;		// 类名映射 NodeJS
 
+	std::vector<std::string> m_vct_include;
 	std::string m_str_namespace;	// 命名空间
 	std::map<std::string, std::vector<std::string> > m_map_enum;	// 枚举映射
 	std::vector<Table> m_vct_table;	// 列表

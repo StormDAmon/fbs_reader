@@ -106,6 +106,7 @@ bool reader::load(const std::string &str_path)
 			MATCH("enum")
 			MATCH("table")
 			MATCH("root_type")
+			MATCH("include")
 		}
 
 		// Data
@@ -119,10 +120,15 @@ bool reader::load(const std::string &str_path)
 				BOTH("namespace", ";") ||
 				BOTH("enum", "}") ||
 				BOTH("table", "}") ||
-				BOTH("root_type", ";"))
+				BOTH("root_type", ";") ||
+				BOTH("include", ".fbs"))
 			{
 				// 填充缓存
-				if (BOTH("namespace", ";"))
+				if (BOTH("include", ".fbs"))
+				{
+					m_vct_include.push_back(str_cur_tmp.substr(str_cur_tmp.find("\"") + 1, str_cur_tmp.size() - str_cur_tmp.find("\"") - 2));
+				}
+				else if (BOTH("namespace", ";"))
 				{
 					m_str_namespace = str_cur_tmp.substr(10, str_cur_tmp.size() - 10 - 1);
 				}

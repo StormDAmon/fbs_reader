@@ -291,13 +291,22 @@ std::string reader::build_cpp()
 		table.reader += "#endif\n";
 	}
 
+	std::string str_include;
+	for (const auto& i : m_vct_include)
+	{
+		str_include += "#include \"" + i + "_reader.h\"\n";
+	}
+
 	// 填充宏
 	std::string str_out = "#pragma once\n\
 #include <vector>\n\
 #include <sstream>\n\
 #include \"flatbuffers/flatbuffers.h\"\n\
-#include \"" + m_str_file_name + "_generated.h\"\n\
-\n\n\
+#include \"" + m_str_file_name + "_generated.h\"\n"
++
+	str_include
++
+"\n\n\
 namespace FR\n\
 {\n\
 \n\
