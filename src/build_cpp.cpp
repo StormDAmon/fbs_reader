@@ -298,6 +298,56 @@ std::string reader::build_cpp()
 \t\tss << data.toJson(true);\n\
 \t\treturn ss;\n\
 \t}\n";
+
+		// ==
+		std::string strOpTmp;
+		for (const auto& i : vct_items_fix)
+		{
+			strOpTmp += "\t\tif (a." + i.label + " != b." + i.label + ") return false;\n";
+		}
+		table.reader += "\
+\tfriend bool operator ==(const " + table.name + "& a, const " + table.name + "& b)\n\
+\t{\n"
+	+ strOpTmp +
+"\
+\t\treturn true;\n\
+\t}\n";
+		// !=
+		table.reader += "\
+\tfriend bool operator !=(const " + table.name + "& a, const " + table.name + "& b)\n\
+\t{\n\
+\t\treturn !(a == b);\n\
+\t}\n";
+		// <
+		strOpTmp.clear();
+		for (const auto& i : vct_items_fix)
+		{
+			strOpTmp += "\t\tif (a." + i.label + " > b." + i.label + ") return false;\n";
+		}
+		table.reader += "\
+\tfriend bool operator <(const " + table.name + "& a, const " + table.name + "& b)\n\
+\t{\n\
+\t\tif (a == b) return false;\n"
+	+ strOpTmp +
+"\
+\t\treturn true;\n\
+\t}\n";
+		// >
+		strOpTmp.clear();
+		for (const auto& i : vct_items_fix)
+		{
+			strOpTmp += "\t\tif (a." + i.label + " < b." + i.label + ") return false;\n";
+		}
+		table.reader += "\
+\tfriend bool operator >(const " + table.name + "& a, const " + table.name + "& b)\n\
+\t{\n\
+\t\tif (a == b) return false;\n"
+	+ strOpTmp +
+"\
+\t\treturn true;\n\
+\t}\n";
+
+
 		table.reader += "};\n";
 		table.reader += "#endif\n";
 	}
