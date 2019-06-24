@@ -62,6 +62,14 @@ std::string reader::build_cpp()
 			}
 			if (isInMapK(m_map_cls_name_cpp, item_new.cls)) item_new.cls = m_map_cls_name_cpp[item_new.cls];
 			else if (m_map_enum.end() != m_map_enum.find(item_new.cls)) item_new.cls = m_str_namespace + "::" + item_new.cls;
+			else if (std::string::npos != m_strIncludeStr.find("enum " + item_new.cls))
+			{
+				item_new.cls = m_str_namespace + "::" + item_new.cls;
+			}
+			else if (std::string::npos != m_strIncludeStr.find("table " + item_new.cls))
+			{
+				item_new.cls = "FR::" + item_new.cls;
+			}
 
 			vct_items_fix.push_back(item_new);
 		}
@@ -103,7 +111,8 @@ std::string reader::build_cpp()
 				table.reader += "\t\t" + item.label + " = 0.0;\n";
 			}
 			else if (std::string::npos != item.cls.find(m_str_namespace + "::") &&
-				std::string::npos == item.cls.find("std::vector"))
+				std::string::npos == item.cls.find("std::vector") &&
+				m_map_enum.end() != m_map_enum.find(item.cls.substr(item.cls.rfind(":") + 1, item.cls.size() - m_str_namespace.size() - 2)))
 			{
 				std::string str_value = m_map_enum[item.cls.substr(item.cls.rfind(":") + 1, item.cls.size() - m_str_namespace.size() - 2)][0];
 				rl_replace(str_value, "\r\n", "");
@@ -250,8 +259,10 @@ std::string reader::build_cpp()
 			{
 				str_value = " << \"\\\"\" << EnumName" + str_cls.substr(str_cls.rfind(":") + 1, str_cls.size() - str_cls.rfind(":")) + "(" + iter->label + ") << \"\\\"\"";
 			}
-			else if (!in_m_value(m_map_cls_name_cpp, str_cls) && std::string::npos == str_cls.find("::") ||
-				std::string::npos != str_cls.find("std::string"))
+			else if (!in_m_value(m_map_cls_name_cpp, str_cls) && 
+					std::string::npos == str_cls.find("::") ||
+				std::string::npos != str_cls.find("std::string") ||
+				std::string::npos != str_cls.find("FR::"))
 			{
 				str_value = " << " + iter->label + ".toJson(bSimplify)";
 				if (std::string::npos != str_cls.find("std::string"))

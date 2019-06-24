@@ -98,10 +98,13 @@ private:
 	std::map<std::string, std::string> m_map_cls_name_njs;		// 类名映射 NodeJS
 
 	std::vector<std::string> m_vct_include;
+	std::string m_strIncludeStr;	// 保存所有的include内容，用于匹配枚举
 	std::string m_str_namespace;	// 命名空间
 	std::map<std::string, std::vector<std::string> > m_map_enum;	// 枚举映射
 	std::vector<Table> m_vct_table;	// 列表
 
+	// 递归保存include内容
+	std::string getIncludeStr(const std::string& strPath);
 };
 
 

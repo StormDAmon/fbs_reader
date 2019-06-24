@@ -126,7 +126,10 @@ bool reader::load(const std::string &str_path)
 				// 填充缓存
 				if (BOTH("include", ".fbs"))
 				{
-					m_vct_include.push_back(str_cur_tmp.substr(str_cur_tmp.find("\"") + 1, str_cur_tmp.size() - str_cur_tmp.find("\"") - 2));
+					std::string stdIncludePath = str_cur_tmp.substr(str_cur_tmp.find("\"") + 1, str_cur_tmp.size() - str_cur_tmp.find("\"") - 2);
+					m_vct_include.push_back(stdIncludePath);
+					stdIncludePath += ".fbs";
+					m_strIncludeStr = getIncludeStr(stdIncludePath);
 				}
 				else if (BOTH("namespace", ";"))
 				{
@@ -273,4 +276,31 @@ bool reader::save(const Reader_Type &type, const std::string &str_src)
 	file.close();
 	return true;
 }
+
+
+
+
+std::string reader::getIncludeStr(const std::string& strPath)
+{
+	std::ifstream file(m_str_path + strPath, std::ios::in);
+	if (!file) return "";
+	char c;
+	std::string strInclude;
+	while ((c = file.get()) != EOF) strInclude += c;
+	file.close();
+	if (strInclude.empty()) return "";
+
+	std::string strIncludeTmp = strInclude;
+	while (	std::string::npos != strIncludeTmp.find("include \"") &&
+			std::string::npos != strIncludeTmp.find(".fbs\""))
+	{
+		strIncludeTmp = strIncludeTmp.substr(strIncludeTmp.find("include \""), strIncludeTmp.size() - strIncludeTmp.find("include \""));
+		std::string strIncludePath = strIncludeTmp.substr(9, strIncludeTmp.find(".fbs\"") - 10 + 5);
+
+		strInclude += "\n\n\n\n";
+		strInclude += getIncludeStr(strIncludePath);
+	}
+	return strInclude;
+}
+
 

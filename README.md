@@ -9,6 +9,14 @@
 
 ## 安装使用
 
+### 安装依赖 - ubuntu
+``` shell
+    sudo apt install git cmake
+```
+### 安装依赖 - macOS
+``` shell
+    brew install git cmake
+```
 ### 安装依赖
 ``` shell
     git clone https://github.com/google/flatbuffers.git && cd flatbuffers
