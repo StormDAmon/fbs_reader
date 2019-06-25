@@ -127,10 +127,14 @@ bool reader::load(const std::string &str_path)
 				if (BOTH("include", ".fbs"))
 				{
 					std::string stdIncludePath = str_cur_tmp.substr(str_cur_tmp.find("\"") + 1, str_cur_tmp.size() - str_cur_tmp.find("\"") - 2);
-					if (m_vct_include.end() == std::find(m_vct_include.begin(), m_vct_include.end(), stdIncludePath))
+
+					bool bFound = false;
+					for (const auto& i : m_vct_include)
 					{
-						m_vct_include.push_back(stdIncludePath);
+						if (i == stdIncludePath) bFound = true;
 					}
+					if (!bFound) m_vct_include.push_back(stdIncludePath);
+
 					stdIncludePath += ".fbs";
 					m_strIncludeStr = getIncludeStr(stdIncludePath);
 				}
