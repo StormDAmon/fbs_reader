@@ -11,7 +11,7 @@
 
 ### 安装依赖 - ubuntu
 ``` shell
-    sudo apt install git cmake
+    sudo apt install git cmake build-essential
 ```
 ### 安装依赖 - macOS
 ``` shell

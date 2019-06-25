@@ -127,7 +127,7 @@ bool reader::load(const std::string &str_path)
 				if (BOTH("include", ".fbs"))
 				{
 					std::string stdIncludePath = str_cur_tmp.substr(str_cur_tmp.find("\"") + 1, str_cur_tmp.size() - str_cur_tmp.find("\"") - 2);
-					m_vct_include.push_back(stdIncludePath);
+					if (m_vct_include.end() == std::find(m_vct_include.begin(), m_vct_include.end(), stdIncludePath)) m_vct_include.push_back(stdIncludePath);
 					stdIncludePath += ".fbs";
 					m_strIncludeStr = getIncludeStr(stdIncludePath);
 				}

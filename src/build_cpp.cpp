@@ -62,7 +62,7 @@ std::string reader::build_cpp()
 			}
 			if (isInMapK(m_map_cls_name_cpp, item_new.cls)) item_new.cls = m_map_cls_name_cpp[item_new.cls];
 			else if (m_map_enum.end() != m_map_enum.find(item_new.cls)) item_new.cls = m_str_namespace + "::" + item_new.cls;
-			else if (std::string::npos != m_strIncludeStr.find("enum " + item_new.cls))
+			else if (std::string::npos != m_strIncludeStr.find("enum " + item_new.cls + ":"))
 			{
 				item_new.cls = m_str_namespace + "::" + item_new.cls;
 			}
