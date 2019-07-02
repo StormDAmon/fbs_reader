@@ -105,7 +105,8 @@ std::string reader::build_cpp()
 			{
 				table.reader += "\t\t" + item.label + " = 0;\n";
 			}
-			else if (std::string::npos != item.cls.find("float") &&
+			else if ((std::string::npos != item.cls.find("float") ||
+				std::string::npos != item.cls.find("double")) &&
 				std::string::npos == item.cls.find("std::vector"))
 			{
 				table.reader += "\t\t" + item.label + " = 0.0;\n";

@@ -18,7 +18,7 @@
     brew install git cmake
 ```
 ### 安装依赖
-``` shellß
+``` shell
     git clone https://github.com/google/flatbuffers.git && cd flatbuffers
     mkdir release && cd release
     cmake ..
