@@ -26,7 +26,7 @@ reader::reader()
 	m_map_cls_name_cpp["uint32"] = "uint32_t";
 	m_map_cls_name_cpp["uint64"] = "uint64_t";
 	m_map_cls_name_cpp["long"] = "long";
-	m_map_cls_name_cpp["ulong"] = "ulong";
+	m_map_cls_name_cpp["ulong"] = "uint64_t";
 	m_map_cls_name_cpp["float"] = "float";
 	m_map_cls_name_cpp["float32"] = "float";
 	m_map_cls_name_cpp["float64"] = "float";
