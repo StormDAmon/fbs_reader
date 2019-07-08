@@ -1,4 +1,4 @@
-.vscode
-build
-buildMac
-flatbuffers
+**/.vscode
+**/build
+**/buildMac
+**/release

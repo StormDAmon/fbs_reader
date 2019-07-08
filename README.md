@@ -9,28 +9,10 @@
 
 ## 安装使用
 
-### 安装依赖 - ubuntu
-``` shell
-    sudo apt install git cmake build-essential
-```
-### 安装依赖 - macOS
-``` shell
-    brew install git cmake
-```
-### 安装依赖
-``` shell
-    git clone https://github.com/google/flatbuffers.git && cd flatbuffers
-    mkdir release && cd release
-    cmake ..
-    make && sudo make install
-    cd ../.. && rm -rf flatbuffers
-```
-
 ### 安装
 ``` shell
-    rm -rf build && mkdir build && cd build && cmake ..
-    make
-    sudo make install
+    chmod +x install.sh
+    ./install.sh
 ```
 
 
