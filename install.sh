@@ -43,12 +43,13 @@ fi
 
 # 安装程序
 cd $runPath
-if [ ! -d "build" ]; then
-    mkdir build
+if [ ! -d "release" ]; then
+    mkdir release
 fi
-cd build
+cd release
 cmake ..
 make
 sudo make install
 sudo chmod +x -R /usr/local/bin/fbs_reader
+cd $runPath
 
