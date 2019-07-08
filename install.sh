@@ -6,9 +6,9 @@ runPath=$(pwd)
 # 安装依赖
 sysOS=`uname -s`
 if [ $sysOS == "Darwin" ];then
-    brew install git cmake
+    brew install git cmake git-lfs
 elif [ $sysOS == "Linux" ];then
-    sudo apt install git build-essential -y
+    sudo apt install git build-essential wget curl -y
 
     # 安装cmake
     #wget https://github.com/Kitware/CMake/releases/download/v3.15.0-rc3/cmake-3.15.0-rc3-Linux-x86_64.tar.gz
