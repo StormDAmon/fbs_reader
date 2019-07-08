@@ -9,6 +9,8 @@ if [ $sysOS == "Darwin" ];then
     brew install git cmake git-lfs
 elif [ $sysOS == "Linux" ];then
     sudo apt install git build-essential wget curl -y
+    sudo dpkg -i pkg/git-lfs_1.2.1_amd64.deb
+    git lfs install
 
     # 安装cmake
     #wget https://github.com/Kitware/CMake/releases/download/v3.15.0-rc3/cmake-3.15.0-rc3-Linux-x86_64.tar.gz
