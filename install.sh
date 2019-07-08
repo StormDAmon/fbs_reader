@@ -22,18 +22,16 @@ elif [ $sysOS == "Linux" ];then
         sudo ln -sf $cmakePath/bin/* /usr/bin/
         cd $runPath
     fi
-
-
 fi
 
 # 安装flatbuffers
 #git clone https://github.com/google/flatbuffers.git
 fbsVersion="null"
-if type flatc >/dev/null 2>&1;then 
+if type flatc >/dev/null 2>&1; then 
     fbsVersion=$(flatc --version)
 fi
 echo $fbsVersion
-if [ "$fbsVersion" != "flatc version 1.11.0" ];then
+if [ "$fbsVersion" != "flatc version 1.11.0" ]; then
     cd pkg/flatbuffers
     rm -rf release
     mkdir release && cd release
