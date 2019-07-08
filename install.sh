@@ -50,6 +50,6 @@ cd release
 cmake ..
 make
 sudo make install
-sudo chmod +x -R /usr/local/bin/fbs_reader
+sudo chmod -R +x /usr/local/bin/fbs_reader
 cd $runPath
 
