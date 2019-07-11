@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14.1)
+cmake_minimum_required(VERSION 3.5.1)
 project(fbs_reader VERSION "1.0.0")
 
 set(CMAKE_BUILD_TYPE "Release")
@@ -7,13 +7,13 @@ if (CMAKE_BUILD_TYPE MATCHES "Debug")
 else()
     set(CMAKE_BUILD_TYPE "Release")
 endif (CMAKE_BUILD_TYPE MATCHES "Debug")
-
 message("-- Current Mode: " ${CMAKE_BUILD_TYPE})
+
+
 
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O -w -g -ggdb")
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -w")
-
-add_definitions(-std=c++11)
+add_definitions(-std=c++17)
 add_definitions(-D__LINUX__=1)
 
 
