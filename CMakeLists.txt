@@ -36,6 +36,7 @@ message("-- System: " ${CMAKE_SYSTEM_NAME})
 if (CMAKE_BUILD_TYPE MATCHES "Release")
 else ()
     add_definitions(-DDEBUG)
+    set (CMAKE_BUILD_TYPE "Debug")
 endif ()
 message("-- Current Mode: " ${CMAKE_BUILD_TYPE})
 

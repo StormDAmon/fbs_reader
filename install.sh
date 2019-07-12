@@ -56,13 +56,13 @@ if [ ! -d "build" ]; then
 fi
 cd build
 {
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
 } ||
 {
     sudo rm -rf *
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
 }
-make -j4
+make -j24
 sudo make install
 sudo chmod -R +x /usr/local/bin/fbs_reader
 cd $runPath
