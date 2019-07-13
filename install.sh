@@ -62,7 +62,7 @@ cd build
     sudo rm -rf *
     cmake -DCMAKE_BUILD_TYPE=Release ..
 }
-make -j24
+make -j4
 sudo make install
 sudo chmod -R +x /usr/local/bin/fbs_reader
 cd $runPath
