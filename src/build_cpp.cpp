@@ -123,10 +123,20 @@ std::string reader::build_cpp()
 			}
 		}
 		table.reader += "\t}\n";
+
+
+		table.reader += "\t" + table.name + "(const std::vector<int8_t>& vct)\n";
+		table.reader += "\t{\n";
+		table.reader += "\t\tstd::string str;\n";
+		table.reader += "\t\tstr.insert(str.begin(), vct.begin(), vct.end());\n";
+		table.reader += "\t\t*this = " + table.name + "(str);\n";
+		table.reader += "\t}\n";
+
 		table.reader += "\t" + table.name + "(const std::string& str)\n";
 		table.reader += "\t{\n";
 		table.reader += "\t\t*this = " + table.name + "(str.data(), str.size());\n";
 		table.reader += "\t}\n";
+
 		table.reader += "\t" + table.name + "(const " + table.name + " &src)\n";
 		table.reader += "\t{\n";
 		for (auto item : vct_items_fix)
