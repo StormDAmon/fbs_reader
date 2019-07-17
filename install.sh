@@ -45,7 +45,7 @@ if [ "$fbsVersion" != "flatc version 1.11.0" ]; then
         sudo rm -rf *
         cmake ..
     }
-    make -j4 && sudo make install
+    make -j && sudo make install
     cd $runPath
 fi
 
@@ -62,7 +62,7 @@ cd build
     sudo rm -rf *
     cmake -DCMAKE_BUILD_TYPE=Release ..
 }
-make -j4
+make -j
 sudo make install
 sudo chmod -R +x /usr/local/bin/fbs_reader
 cd $runPath
