@@ -10,32 +10,25 @@
 
 
 // Split
-static std::vector<std::string> rl_split(const std::string& str_src, const std::string& str_split)
+static std::vector<std::string> rl_split(const std::string &strSrc, const std::string &strSplit)
 {
-	std::vector<std::string> vct_out;
-	if (str_src.empty() || str_split.empty()) return vct_out;
-	std::string str_src_tmp = str_src;
-	std::vector<char*> vct_out_tmp;
-
-	char *_s = (char*)str_src_tmp.c_str();
-	while (1)
+	std::vector<std::string> vctOut;
+    std::string strTmp = strSrc;
+    while (strTmp.size())
 	{
-		char *p = strstr(_s, str_split.c_str());
-		if (!p)
+        int nIndex = strTmp.find(strSplit);
+        if (std::string::npos == nIndex)
 		{
-			vct_out_tmp.push_back(_s);
-			break;
-		}
-		*p = 0;
-		vct_out_tmp.push_back(_s);
-		_s = p + str_split.size();
-	}
-
-	for (auto iter : vct_out_tmp)
-	{
-		vct_out.push_back(iter);
-	}
-	return vct_out;
+            vctOut.push_back(strTmp);
+            strTmp.clear();
+        }
+        else
+		{
+            vctOut.push_back(strTmp.substr(0, nIndex));
+            strTmp = strTmp.substr(nIndex + strSplit.size(), strTmp.size() - nIndex - strSplit.size());
+        }
+    }
+	return vctOut;
 }
 
 // Join
