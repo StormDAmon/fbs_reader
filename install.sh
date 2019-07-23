@@ -1,5 +1,15 @@
 #!/bin/bash
 set -e
+sysName=$(cat /etc/*-release)
+if [[ "$sysName" =~ CentOS ]]
+then
+    {
+        yum install sudo gcc-c++ -y
+    } ||
+    {
+        echo not by root
+    }
+fi
 sudo echo begin
 runPath=$(pwd)
 sysOS=$(uname -s)
@@ -18,7 +28,7 @@ then
         sudo apt autoremove cmake -y
     elif [[ "$sysName" =~ CentOS ]]
     then
-        sudo yum install git make gcc -y
+        sudo yum install git make gcc unzip -y
 
     fi
 
