@@ -86,12 +86,13 @@ fi
 cd build
 {
     cmake -DCMAKE_BUILD_TYPE=Release ..
+    make -j
 } ||
 {
     sudo rm -rf *
     cmake -DCMAKE_BUILD_TYPE=Release ..
+    make -j
 }
-make -j
 sudo make install
 sudo chmod -R +x /usr/local/bin/fbs_reader
 cd $runPath
