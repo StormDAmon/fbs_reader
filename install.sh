@@ -38,7 +38,7 @@ then
     fi
     # 安装cmake3.15
     cd $runPath
-    cmakePath="/reckless/opt/cmake_3.15"
+    cmakePath="/reckless/opt/cmake"
     if [ ! -d $cmakePath ]
     then
         cd pkg
