@@ -29,7 +29,7 @@ then
     elif [[ "$sysName" =~ CentOS ]]
     then
         sudo yum install git make gcc unzip -y
-
+        
     fi
 
     if [ ! -d "/reckless/opt/" ]
