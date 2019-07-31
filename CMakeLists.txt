@@ -22,11 +22,6 @@ add_definitions(-DBOOST_MODE=1)
 
 # 工程
 project(fbs_reader VERSION "1.0.0")
-if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-    set(BoostMT "")
-else (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-    set(BoostMT "-mt")
-endif ()
 message("-- System: " ${CMAKE_SYSTEM_NAME})
 if (CMAKE_BUILD_TYPE MATCHES "Release")
 else ()
