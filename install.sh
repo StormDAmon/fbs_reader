@@ -1,15 +1,20 @@
 #!/bin/bash
 set -e
-sysName=$(cat /etc/*-release)
-if [[ "$sysName" =~ CentOS ]]
-then
-    {
-        yum install sudo gcc-c++ -y
-    } ||
-    {
-        echo not by root
-    }
-fi
+{
+    sysName=$(cat /etc/*-release)
+    if [[ "$sysName" =~ CentOS ]]
+    then
+        {
+            yum install sudo gcc-c++ -y
+        } ||
+        {
+            echo not by root
+        }
+    fi
+} ||
+{
+    echo not linux
+}
 sudo echo begin
 runPath=$(pwd)
 sysOS=$(uname -s)
